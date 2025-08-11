@@ -3,17 +3,20 @@ import "./App.css";
 
 function App() {
   const [todoList, setTodoList] = useState([
-    { id: 0, content: "123" },
-    { id: 1, content: "코딩 공부하기" },
-    { id: 2, content: "잠 자기" },
+    { id: 0, content: "123", completed: false },
+    { id: 1, content: "코딩 공부하기", completed: false },
+    { id: 2, content: "잠 자기", completed: false },
   ]);
 
   return (
-    <>
+    <div className="app-container">
+      <header>
+        <h1>Todo-List</h1>
+      </header>
       <TodoList todoList={todoList} setTodoList={setTodoList} />
       <hr />
       <TodoInput todoList={todoList} setTodoList={setTodoList} />
-    </>
+    </div>
   );
 }
 
@@ -26,7 +29,7 @@ function TodoInput({ todoList, setTodoList }) {
         value={inputValue}
         onChange={(event) => setInputValue(event.target.value)}
       />
-      <button
+      <button className="add-button"
         onClick={() => {
           const newTodo = { id: Number(new Date()), content: inputValue };
           const newTodoList = [...todoList, newTodo];
@@ -51,24 +54,53 @@ function TodoList({ todoList, setTodoList }) {
 }
 
 function Todo({ todo, setTodoList }) {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(todo.content);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const toggleCompleted = () => {
+    setTodoList((prev) =>
+      prev.map((el) =>
+        el.id === todo.id ? { ...el, completed: !el.completed } : el
+      )
+    );
+  };
+
+  const handleEditClick = () => {
+    setTodoList((prev) =>
+      prev.map((el) =>
+        el.id === todo.id ? { ...el, content: inputValue } : el
+      )
+    );
+    setIsEditing(false);
+  };
+
   return (
-    <li>
-      {todo.content}
+    <li className={todo.completed ? "completed" : "" }>
       <input
-        value={inputValue}
-        onChange={(event) => setInputValue(event.target.value)}
+        type="checkbox"
+        checked={todo.completed}
+        onChange={toggleCompleted}
       />
-      <button
-        onClick={() => {
-          setTodoList((prev) =>
-            prev.map((el) =>
-              el.id === todo.id ? { ...el, content: inputValue } : el
-            )
-          );
-        }}
+
+      {isEditing ? (
+        <input
+          value={inputValue}
+          onChange={e => setInputValue(e.target.value)}
+          autoFocus />
+      ) : (
+        <span>{todo.content}</span>
+      )}
+
+      <button onClick={() => {
+        if (isEditing) {
+          handleEditClick();
+        } else {
+          setIsEditing(true);
+        }
+      }}
       >
-        수정
+
+        {isEditing ? '수정 완료' : '수정'}
       </button>
       <button
         onClick={() => {
